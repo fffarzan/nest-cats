@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Header, HttpCode, Param, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Header, HttpCode, HttpStatus, Param, ParseIntPipe, Post } from "@nestjs/common";
 import { CreateCatDto } from "./dto/create-cat.dto";
 import { CatsService } from "./cats.service";
 import { Cat } from "src/cats/interfaces/cat.interface";
@@ -13,8 +13,8 @@ export class CatsController {
     }
 
     @Get(':id')
-    findOne(@Param('id') id: string): string {
-        return `#${id} cat is here!`
+    findOne(@Param('id', new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE })) id: number): Cat {
+        return this.catsService.findOne(id)
     }
 
     @Post()
