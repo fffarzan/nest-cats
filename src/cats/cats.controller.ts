@@ -5,7 +5,7 @@ import { Cat } from "src/cats/interfaces/cat.interface";
 
 @Controller('cats')
 export class CatsController {
-    constructor(private catsService: CatsService) {}
+    constructor(private catsService: CatsService) { }
 
     @Get()
     async findAll(): Promise<Cat[]> {
