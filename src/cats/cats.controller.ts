@@ -1,31 +1,39 @@
-import { Body, Controller, Delete, Get, Header, HttpCode, HttpStatus, Param, ParseIntPipe, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Header, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Put } from "@nestjs/common";
 import { CreateCatDto } from "./dto/create-cat.dto";
 import { CatsService } from "./cats.service";
-import { Cat } from "src/cats/interfaces/cat.interface";
+import { Cat as CatModel } from '@prisma/client'
 
 @Controller('cats')
 export class CatsController {
     constructor(private catsService: CatsService) { }
 
     @Get()
-    async findAll(): Promise<Cat[]> {
+    getCats(): Promise<CatModel[]> {
         return this.catsService.findAll()
     }
 
     @Get(':id')
-    findOne(@Param('id', new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE })) id: number): Cat {
-        return this.catsService.findOne(id)
+    getCat(@Param('id', new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE })) id: number): Promise<CatModel | null> {
+        return this.catsService.findOne({ id })
     }
 
     @Post()
     @HttpCode(204)
     @Header('Cache-Control', 'none')
-    create(@Body() createCatDto: CreateCatDto) {
-        this.catsService.create(createCatDto)
+    createCat(@Body() createCatDto: CreateCatDto): Promise<CatModel> {
+        return this.catsService.create(createCatDto)
+    }
+
+    @Put(':id')
+    async updateCat(@Param('id') id: number, @Body() cat: CatModel): Promise<CatModel> {
+        return this.catsService.update({
+            where: { id },
+            data: cat,
+        });
     }
 
     @Delete(':id')
-    remove(@Param('id') id: string): string {
-        return `#${id} cat is deleted!`
+    removeCat(@Param('id') id: number): Promise<CatModel> {
+        return this.catsService.delete({ id })
     }
 }
